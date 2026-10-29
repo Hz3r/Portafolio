@@ -1,0 +1,43 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { site } from '../data/site';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+
+const socials = [
+  { href: site.socials.github, label: 'GitHub' },
+  { href: site.socials.linkedin, label: 'LinkedIn' },
+  { href: site.socials.x, label: 'X' },
+];
+---
+
+<footer class="border-t border-line mt-16">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+    <div>
+      <p class="font-mono text-sm">
+        <span class="text-accent">~/</span>{site.name}
+      </p>
+      <p class="text-sm text-muted mt-1">{t('footer.built')}</p>
+    </div>
+
+    <div class="flex flex-col items-start sm:items-end gap-3">
+      <div class="flex items-center gap-4">
+        {
+          socials.map((social) => (
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-muted hover:text-accent transition-colors"
+            >
+              {social.label}
+            </a>
+          ))
+        }
+      </div>
+      <p class="text-xs text-muted">© {year} {site.name}. {t('footer.rights')}</p>
+    </div>
+  </div>
+</footer>

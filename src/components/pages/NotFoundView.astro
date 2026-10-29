@@ -1,0 +1,21 @@
+---
+import { useTranslations, localizePath, type Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<div class="flex flex-col items-center justify-center py-24 text-center">
+  <p class="text-gradient font-mono text-7xl font-bold">{t('404.title')}</p>
+  <p class="mt-4 text-muted">{t('404.description')}</p>
+  <a
+    href={localizePath('/', lang)}
+    class="mt-8 inline-flex items-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-bg hover:opacity-90 transition-opacity"
+  >
+    {t('404.cta')}
+  </a>
+</div>

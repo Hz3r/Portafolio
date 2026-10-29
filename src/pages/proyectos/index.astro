@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectsView from '../../components/pages/ProjectsView.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('es');
+const projects = (await getCollection('projects', ({ data }) => data.draft !== true)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title={t('projects.title')} description={t('projects.description')}>
+  <ProjectsView lang="es" projects={projects} />
+</BaseLayout>

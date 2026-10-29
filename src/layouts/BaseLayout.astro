@@ -1,0 +1,126 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const fullTitle = title === site.name ? `${site.name} · ${t('hero.badge')}` : `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={lang} class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" hreflang="es" href={new URL(Astro.url.pathname.replace(/^\/en/, '') || '/', Astro.site)} />
+    <link rel="alternate" hreflang="en" href={new URL(Astro.url.pathname.startsWith('/en') ? Astro.url.pathname : `/en${Astro.url.pathname}`, Astro.site)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/og.png', Astro.site)} />
+    <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'es_ES'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem('theme');
+        const dark = stored ? stored === 'dark' : true;
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <Header />
+    <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      function applyTheme(theme: 'light' | 'dark') {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        localStorage.setItem('theme', theme);
+        document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
+          btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const toggle = target.closest('[data-theme-toggle]');
+        if (toggle) {
+          const isDark = document.documentElement.classList.contains('dark');
+          applyTheme(isDark ? 'light' : 'dark');
+          return;
+        }
+
+        const menuBtn = target.closest('[data-menu-toggle]');
+        if (menuBtn) {
+          const nav = document.querySelector('[data-mobile-nav]');
+          if (nav) nav.classList.toggle('hidden');
+          return;
+        }
+      });
+
+      document.addEventListener('submit', async (e) => {
+        const form = e.target as HTMLFormElement;
+        if (!form.matches('form[data-contact-form]')) return;
+        e.preventDefault();
+
+        const endpoint = form.getAttribute('data-endpoint');
+        const status = form.querySelector('[data-form-status]');
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        if (!endpoint || !status || !button) return;
+
+        button.disabled = true;
+        const original = button.textContent;
+        button.textContent = form.getAttribute('data-sending-label') ?? '...';
+        status.textContent = '';
+        status.className = 'text-sm';
+
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: new FormData(form),
+          });
+          if (!res.ok) throw new Error('bad response');
+          form.reset();
+          status.textContent = form.getAttribute('data-success-label') ?? 'OK';
+          status.classList.add('text-emerald-400');
+        } catch {
+          status.textContent = form.getAttribute('data-error-label') ?? 'Error';
+          status.classList.add('text-rose-400');
+        } finally {
+          button.disabled = false;
+          button.textContent = original;
+        }
+      });
+    </script>
+  </body>
+</html>

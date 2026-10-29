@@ -1,0 +1,84 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { useTranslations, localizePath, formatDate, type Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  project: CollectionEntry<'projects'>;
+}
+
+const { lang, project } = Astro.props;
+const t = useTranslations(lang);
+const description = lang === 'en' ? project.data.descriptionEn : project.data.description;
+---
+
+<article>
+  <a href={localizePath('/proyectos/', lang)} class="font-mono text-xs text-muted hover:text-accent transition-colors">
+    ← {t('projects.back')}
+  </a>
+
+  <header class="mt-6 mb-8">
+    <div class="flex items-center gap-3 font-mono text-xs text-muted mb-3">
+      <span class="text-accent">{t('projects.published')}</span>
+      <time datetime={project.data.pubDate.toISOString()}>{formatDate(project.data.pubDate, lang)}</time>
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">{project.data.title}</h1>
+    <p class="mt-4 text-lg text-muted leading-relaxed max-w-2xl">{description}</p>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      {
+        project.data.demo && (
+          <a
+            href={project.data.demo}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg hover:opacity-90 transition-opacity"
+          >
+            {t('projects.demo')} ↗
+          </a>
+        )
+      }
+      {
+        project.data.repo && (
+          <a
+            href={project.data.repo}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center rounded-lg border border-line px-4 py-2 text-sm font-semibold hover:border-accent/50 hover:text-accent transition-colors"
+          >
+            {t('projects.repo')} ↗
+          </a>
+        )
+      }
+    </div>
+  </header>
+
+  {
+    project.data.cover && (
+      <img
+        src={project.data.cover}
+        alt={project.data.title}
+        class="w-full rounded-xl border border-line mb-8 glow-ring"
+      />
+    )
+  }
+
+  <section class="mb-10">
+    <h2 class="font-mono text-xs uppercase tracking-widest text-accent mb-3">{t('projects.tags')}</h2>
+    <ul class="flex flex-wrap gap-2">
+      {
+        project.data.tags.map((tag) => (
+          <li class="rounded-md border border-line bg-bg-soft px-3 py-1 font-mono text-xs text-muted">{tag}</li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    project.data.updatedDate && (
+      <p class="text-xs text-muted font-mono">
+        Updated: {formatDate(project.data.updatedDate, lang)}
+      </p>
+    )
+  }
+</article>

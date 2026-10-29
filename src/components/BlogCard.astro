@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { localizePath, getLangFromUrl, formatDate } from '../i18n/utils';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+---
+
+<article class="group relative rounded-xl border border-line bg-surface p-5 flex flex-col gap-3 glow-ring transition-all hover:-translate-y-0.5 hover:border-accent/40">
+  <div class="flex items-center justify-between gap-3">
+    <time class="font-mono text-xs text-muted" datetime={post.data.pubDate.toISOString()}>
+      {formatDate(post.data.pubDate, lang)}
+    </time>
+    {
+      post.data.tags.length > 0 && (
+        <span class="font-mono text-[11px] text-accent">{post.data.tags[0]}</span>
+      )
+    }
+  </div>
+  <h3 class="text-lg font-semibold leading-snug">
+    <a href={localizePath(`/blog/${post.id.replace(/^(es|en)\//, '')}/`, lang)} class="hover:text-accent transition-colors">
+      {post.data.title}
+      <span class="absolute inset-0" aria-hidden="true"></span>
+    </a>
+  </h3>
+  <p class="text-sm text-muted leading-relaxed">{post.data.description}</p>
+</article>

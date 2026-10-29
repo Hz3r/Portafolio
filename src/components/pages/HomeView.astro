@@ -1,0 +1,152 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectCard from '../ProjectCard.astro';
+import BlogCard from '../BlogCard.astro';
+import { useTranslations, localizePath, type Lang } from '../../i18n/utils';
+import { skillGroups } from '../../data/skills';
+import { site } from '../../data/site';
+
+interface Props {
+  lang: Lang;
+  featured: CollectionEntry<'projects'>[];
+  latestPosts: CollectionEntry<'blog'>[];
+}
+
+const { lang, featured, latestPosts } = Astro.props;
+const t = useTranslations(lang);
+const totalProjects = featured.length;
+const terminalLines = [
+  `$ ${site.name.toLowerCase()} --whoami`,
+  `> ${t('hero.badge')}`,
+  `> ${t('hero.stat.stack')}: Astro · Tailwind · AI`,
+  `$ _`,
+];
+---
+
+<section class="relative overflow-hidden rounded-2xl border border-line bg-surface glow-ring">
+  <div class="absolute inset-0 bg-grid opacity-[0.35]" aria-hidden="true"></div>
+  <div class="absolute -top-24 right-0 h-64 w-64 rounded-full bg-accent/10 blur-3xl" aria-hidden="true"></div>
+  <div class="absolute -bottom-32 left-10 h-64 w-64 rounded-full bg-violet/10 blur-3xl" aria-hidden="true"></div>
+
+  <div class="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-10 p-8 sm:p-12">
+    <div class="flex flex-col justify-center gap-6">
+      <p class="inline-flex w-fit items-center gap-2 rounded-full border border-line bg-bg-soft px-3 py-1 font-mono text-xs text-muted">
+        <span class="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot"></span>
+        {t('hero.badge')}
+      </p>
+      <h1 class="text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight">
+        <span class="text-gradient">{t('hero.title')}</span>
+      </h1>
+      <p class="text-muted text-base sm:text-lg max-w-xl leading-relaxed">
+        {t('hero.description')}
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href={localizePath('/proyectos/', lang)}
+          class="inline-flex items-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-bg hover:opacity-90 transition-opacity"
+        >
+          {t('hero.cta.projects')}
+        </a>
+        <a
+          href={localizePath('/contacto/', lang)}
+          class="inline-flex items-center rounded-lg border border-line px-5 py-2.5 text-sm font-semibold text-ink hover:border-accent/50 hover:text-accent transition-colors"
+        >
+          {t('hero.cta.contact')}
+        </a>
+      </div>
+      <dl class="flex gap-8 pt-2">
+        <div>
+          <dt class="font-mono text-xs text-muted">{t('hero.stat.projects')}</dt>
+          <dd class="text-2xl font-bold text-gradient">{String(totalProjects).padStart(2, '0')}</dd>
+        </div>
+        <div>
+          <dt class="font-mono text-xs text-muted">{t('hero.stat.posts')}</dt>
+          <dd class="text-2xl font-bold text-gradient">{String(latestPosts.length).padStart(2, '0')}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="flex items-center">
+      <div class="w-full rounded-xl border border-line bg-bg-soft/80 backdrop-blur overflow-hidden">
+        <div class="flex items-center gap-1.5 border-b border-line px-4 py-2.5">
+          <span class="h-2.5 w-2.5 rounded-full bg-rose-400/70"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-amber-400/70"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-emerald-400/70"></span>
+          <span class="ml-2 font-mono text-[11px] text-muted">{t('hero.terminal.title')}</span>
+        </div>
+        <div class="p-5 font-mono text-[13px] leading-relaxed space-y-2">
+          {
+            terminalLines.map((line, i) => (
+              <p class:list={i === 0 ? 'text-accent' : i === terminalLines.length - 1 ? 'text-muted' : 'text-ink'}>
+                {line}
+              </p>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mt-16">
+  <div class="flex items-end justify-between gap-4 mb-6">
+    <h2 class="text-2xl font-bold tracking-tight">{t('home.featured')}</h2>
+    <a href={localizePath('/proyectos/', lang)} class="text-sm text-accent hover:underline shrink-0">
+      {t('home.featured.cta')} →
+    </a>
+  </div>
+  <div class="grid sm:grid-cols-2 gap-5">
+    {featured.slice(0, 4).map((project) => <ProjectCard project={project} />)}
+  </div>
+</section>
+
+<section class="mt-16">
+  <div class="flex items-end justify-between gap-4 mb-6">
+    <h2 class="text-2xl font-bold tracking-tight">{t('home.skills')}</h2>
+    <a href={localizePath('/habilidades/', lang)} class="text-sm text-accent hover:underline shrink-0">
+      {t('home.skills.cta')} →
+    </a>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {
+      skillGroups.slice(0, 3).map((group) => (
+        <div class="rounded-xl border border-line bg-surface p-5">
+          <h3 class="font-mono text-xs uppercase tracking-wider text-accent mb-3">{group.name[lang]}</h3>
+          <ul class="flex flex-wrap gap-1.5">
+            {group.items.map((item) => (
+              <li class="rounded-md border border-line bg-bg-soft px-2.5 py-1 text-[13px] text-muted">{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+{
+  latestPosts.length > 0 && (
+    <section class="mt-16">
+      <div class="flex items-end justify-between gap-4 mb-6">
+        <h2 class="text-2xl font-bold tracking-tight">{t('home.blog')}</h2>
+        <a href={localizePath('/blog/', lang)} class="text-sm text-accent hover:underline shrink-0">
+          {t('home.blog.cta')} →
+        </a>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        {latestPosts.slice(0, 2).map((post) => (
+          <BlogCard post={post} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<section class="mt-16 rounded-2xl border border-line bg-surface p-8 sm:p-12 text-center glow-ring">
+  <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gradient">{t('home.contact')}</h2>
+  <a
+    href={localizePath('/contacto/', lang)}
+    class="mt-6 inline-flex items-center rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-bg hover:opacity-90 transition-opacity"
+  >
+    {t('hero.cta.contact')}
+  </a>
+</section>

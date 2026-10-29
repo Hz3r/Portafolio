@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import { useTranslations, localizePath, formatDate, type Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  post: CollectionEntry<'blog'>;
+}
+
+const { lang, post } = Astro.props;
+const t = useTranslations(lang);
+const { Content } = await render(post);
+---
+
+<article>
+  <a href={localizePath('/blog/', lang)} class="font-mono text-xs text-muted hover:text-accent transition-colors">
+    ← {t('blog.back')}
+  </a>
+
+  <header class="mt-6 mb-10 max-w-3xl">
+    <div class="flex items-center gap-3 font-mono text-xs text-muted mb-3">
+      <span class="text-accent">{t('blog.published')}</span>
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time>
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">{post.data.title}</h1>
+    <p class="mt-4 text-lg text-muted leading-relaxed">{post.data.description}</p>
+    {
+      post.data.tags.length > 0 && (
+        <ul class="mt-5 flex flex-wrap gap-2">
+          {post.data.tags.map((tag) => (
+            <li class="rounded-md border border-line bg-bg-soft px-2.5 py-0.5 font-mono text-[11px] text-muted">
+              {tag}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </header>
+
+  <div class="prose-portfolio max-w-3xl">
+    <Content />
+  </div>
+</article>

@@ -1,0 +1,20 @@
+---
+import { getLangFromUrl } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const pathname = Astro.url.pathname;
+
+const targetPath =
+  lang === 'es'
+    ? `/en${pathname === '/' ? '/' : pathname}`
+    : pathname.replace(/^\/en/, '') || '/';
+const targetLang = lang === 'es' ? 'en' : 'es';
+---
+
+<a
+  href={targetPath}
+  class="inline-flex h-9 items-center rounded-md border border-line px-2.5 font-mono text-xs uppercase tracking-wider text-muted hover:text-ink hover:border-accent/40 transition-colors"
+  aria-label={`Switch to ${targetLang}`}
+>
+  {lang === 'es' ? 'EN' : 'ES'}
+</a>

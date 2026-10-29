@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeView from '../components/pages/HomeView.astro';
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects', ({ data }) => data.draft !== true)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const featured = projects.filter((p) => p.data.featured);
+const posts = (
+  await getCollection('blog', ({ id, data }) => data.draft !== true && id.startsWith('es/'))
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="Hz3r" description="Portafolio de vibecoding, proyectos personales y habilidades.">
+  <HomeView lang="es" featured={featured.length > 0 ? featured : projects} latestPosts={posts} />
+</BaseLayout>

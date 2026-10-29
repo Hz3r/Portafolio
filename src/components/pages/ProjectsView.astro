@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectCard from '../ProjectCard.astro';
+import { useTranslations, type Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  projects: CollectionEntry<'projects'>[];
+}
+
+const { lang, projects } = Astro.props;
+const t = useTranslations(lang);
+
+const allTags = [...new Set(projects.flatMap((p) => p.data.tags))].sort((a, b) =>
+  a.localeCompare(b, lang === 'en' ? 'en' : 'es'),
+);
+---
+
+<header class="mb-10">
+  <p class="font-mono text-xs uppercase tracking-widest text-accent mb-3">~/projects</p>
+  <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">{t('projects.title')}</h1>
+  <p class="mt-3 text-muted max-w-2xl leading-relaxed">{t('projects.description')}</p>
+</header>
+
+{
+  projects.length === 0 ? (
+    <p class="text-muted">{t('projects.empty')}</p>
+  ) : (
+    <>
+      <div class="flex flex-wrap gap-2 mb-8" data-project-filters>
+        <button
+          type="button"
+          data-filter="all"
+          class="filter-btn rounded-md border border-accent/50 bg-accent-soft px-3 py-1.5 font-mono text-xs text-accent transition-colors"
+        >
+          {t('projects.filter.all')}
+        </button>
+        {allTags.map((tag) => (
+          <button
+            type="button"
+            data-filter={tag}
+            class="filter-btn rounded-md border border-line bg-bg-soft px-3 py-1.5 font-mono text-xs text-muted hover:text-ink transition-colors"
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5" data-project-grid>
+        {projects.map((project) => (
+          <div data-tags={project.data.tags.join('|')}>
+            <ProjectCard project={project} />
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+<script>
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-filter]');
+    if (!btn) return;
+
+    const filter = btn.dataset.filter ?? 'all';
+    document.querySelectorAll<HTMLElement>('.filter-btn').forEach((el) => {
+      const active = el === btn;
+      el.classList.toggle('border-accent/50', active);
+      el.classList.toggle('bg-accent-soft', active);
+      el.classList.toggle('text-accent', active);
+      el.classList.toggle('border-line', !active);
+      el.classList.toggle('bg-bg-soft', !active);
+      el.classList.toggle('text-muted', !active);
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-project-grid] > [data-tags]').forEach((card) => {
+      const tags = (card.dataset.tags ?? '').split('|');
+      card.classList.toggle('hidden', filter !== 'all' && !tags.includes(filter));
+    });
+  });
+</script>

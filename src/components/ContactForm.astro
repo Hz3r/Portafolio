@@ -1,0 +1,72 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { site } from '../data/site';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const endpoint = site.contactFormEndpoint;
+---
+
+{
+  endpoint ? (
+    <form
+      data-contact-form
+      data-endpoint={endpoint}
+      data-success-label={t('contact.success')}
+      data-error-label={t('contact.error')}
+      data-sending-label={t('contact.sending')}
+      class="flex flex-col gap-4"
+    >
+      <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="flex flex-col gap-1.5 text-sm">
+          <span class="text-muted">{t('contact.name')}</span>
+          <input
+            type="text"
+            name="name"
+            required
+            class="rounded-lg border border-line bg-bg-soft px-3.5 py-2.5 text-sm text-ink outline-none focus:border-accent/60 transition-colors"
+          />
+        </label>
+        <label class="flex flex-col gap-1.5 text-sm">
+          <span class="text-muted">{t('contact.email')}</span>
+          <input
+            type="email"
+            name="email"
+            required
+            class="rounded-lg border border-line bg-bg-soft px-3.5 py-2.5 text-sm text-ink outline-none focus:border-accent/60 transition-colors"
+          />
+        </label>
+      </div>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="text-muted">{t('contact.message')}</span>
+        <textarea
+          name="message"
+          required
+          rows={6}
+          class="rounded-lg border border-line bg-bg-soft px-3.5 py-2.5 text-sm text-ink outline-none focus:border-accent/60 transition-colors resize-y"
+        />
+      </label>
+      <div class="flex items-center gap-4">
+        <button
+          type="submit"
+          class="inline-flex items-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-bg hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {t('contact.send')}
+        </button>
+        <p data-form-status role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  ) : (
+    <div class="rounded-xl border border-dashed border-line bg-bg-soft p-5 text-sm text-muted">
+      {t('contact.notConfigured')}
+    </div>
+  )
+}
+
+<p class="mt-6 text-sm text-muted">
+  {t('contact.emailLabel')}
+  <a href={`mailto:${site.email}`} class="text-accent hover:underline ml-1 font-mono">
+    {site.email}
+  </a>
+</p>

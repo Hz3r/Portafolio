@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogView from '../../components/pages/BlogView.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('es');
+const posts = (
+  await getCollection('blog', ({ id, data }) => data.draft !== true && id.startsWith('es/'))
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title={t('blog.title')} description={t('blog.description')}>
+  <BlogView lang="es" posts={posts} />
+</BaseLayout>
